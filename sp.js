@@ -177,7 +177,7 @@ function createSearch(){
 
 //Buttons
 	$(SEARCH_ENGS).children("input").each( function() {
-		$(SEARCH_SLC+" form").append('<input type="button" class="button" name="'+$(this).attr("name")+'" value="'+$(this).attr("value")+'" action="'+$(this).attr("action")+'">');
+		$(SEARCH_SLC+" form").append('<input type="button" class="button" name="'+$(this).attr("name")+'" action="'+$(this).attr("action")+'">');
 	});
 
 //Set action to first button
