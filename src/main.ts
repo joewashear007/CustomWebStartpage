@@ -39,11 +39,13 @@ function getdata(): DataSet {
 }
 
 $(document).ready(() => {
+  // Work with the old data still
   getdata();
-  var data: DataSet = JSON.parse(localStorage.getItem("data"));
   $("#searchEng").remove();
   $("#sp").remove();
 
+  // Load data in
+  var data: DataSet = JSON.parse(localStorage.getItem("data"));
   data.search.forEach(i => {
     $("#search").append(`<input type='submit' value='${i.name}' action='${i.action}' />`)
   });
@@ -60,6 +62,70 @@ $(document).ready(() => {
     });
   });
 
+  // reveal groups
+  $(".moreLinks").slideUp();
+  $(".group").mouseenter(function() { $(".moreLinks", this).slideDown(); });
+  $(".group").mouseleave(function() { if (!$(this).hasClass("lock")) { $(".moreLinks", this).slideUp(); } });
+  $(".group").click(function() { $(this).toggleClass("lock"); });
+
+  // slide bars
+  $(window).resize(hideShow);
+  $(".slider").click(function() {
+    if ($(this).children('div').first().is(':visible')) {
+      $(this).children('div').first().attr('id') == "start" ? leftSilde() : rightSlide();
+    }
+  });
+  function rightSlide() {
+    if ($(".group:visible").length > 2) {
+      if (!$('*').is(':animated')) {
+        $('.group:visible:first').children().fadeOut("250", hideShow);
+        // $('.group:visible:first').children().hide("slide", { direction: "left" }, 250, hideShow);
+      }
+    }
+  }
+  function leftSilde() {
+    if (!$('*').is(':animated')) {
+      $('.group:visible:first').prev().show();
+      $('.group:visible:first').children().fadeIn("250", hideShow);
+      // $('.group:visible:first').children().show("slide", { direction: "left" }, 250, hideShow);
+    }
+  }
+  function hideShow() {
+    var cellWidth = $(".area").width();
+    var groupsWidth = $("#GroupTable").width();
+    var nextGroupWidth = 1;
+    var run = true;
+
+    while (run && (groupsWidth > cellWidth)) {
+      if ($('.group:visible').length > 2)
+        $('.group:visible:last').hide();
+      else
+        run = false;
+      groupsWidth = $("#GroupTable").width();
+    }
+    run = true;
+    while (run && (nextGroupWidth > 0)) {
+      groupsWidth = $("#GroupTable").width();
+      if ($('.group:visible:last').next(':hidden').length !== 0)
+        nextGroupWidth = $('.group:visible:last').next(':hidden').width();
+      else
+        nextGroupWidth = 0;
+      if (cellWidth > (groupsWidth + nextGroupWidth))
+        $('.group:visible:last').next(':hidden').show();
+      else
+        run = false;
+    }
+    toggleSliders();
+  }
+  function toggleSliders() {
+    if ($('.group:first').is(':hidden')) { $("#start").show(); $("#start").parent().addClass("slider_color"); }
+    else { $("#start").hide(); $("#start").parent().removeClass("slider_color"); }
+
+    if ($('.group:last').is(':hidden')) { $("#end").show(); $("#end").parent().addClass("slider_color"); }
+    else { $("#end").hide(); $("#end").parent().removeClass("slider_color"); }
+  }
+
+  // handel search
   $("#search input[type=text]").first().focus();
 
   $("#search").attr("action", $("#search input[type=submit]:first").attr("action"));
