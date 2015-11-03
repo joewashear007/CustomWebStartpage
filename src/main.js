@@ -19,6 +19,39 @@ function getdata() {
     localStorage["data"] = JSON.stringify(data);
     return data;
 }
+function rightSlide() {
+    if ($(".group:visible").length > 1) {
+        if (!$('*').is(':animated')) {
+            $('.group:visible:first').fadeOut("250", hideShow);
+        }
+    }
+}
+function leftSilde() {
+    if (!$('*').is(':animated')) {
+        $('.group:visible:first').prev().fadeIn("250", hideShow);
+    }
+}
+function hideShow() {
+    var width = $(".content").width();
+    if ($(".group:visible").length == 0) {
+        $(".group:first").show();
+    }
+    var groupWidth = $(".group:first").outerWidth(true);
+    var maxVisible = Math.floor(width / groupWidth);
+    var areVisible = false;
+    var i = 0;
+    $(".group").each(function (j, el) {
+        if ($(el).is(":visible") && !areVisible) {
+            areVisible = true;
+        }
+        if (areVisible) {
+            (i < maxVisible) ? $(el).show() : $(el).hide();
+            i++;
+        }
+    });
+    $('.group:first').is(':hidden') ? $("#left-slider").show() : $("#left-slider").hide();
+    $('.group:last').is(':hidden') ? $("#right-slider").show() : $("#right-slider").hide();
+}
 $(document).ready(function () {
     getdata();
     $("#searchEng").remove();
@@ -29,86 +62,19 @@ $(document).ready(function () {
     });
     Object.keys(data.links).forEach(function (key) {
         var obj = data.links[key];
-        $("#GroupTable tr:first").append("<td class='group'><div name='" + key + "' class='group_spacer'><h1 class='title'>" + key + "</h1><span class='moreLinks'></span></div></td>");
+        $(".content").append("<div class='group' name='" + key + "' style=\"display:none\"><h3>" + key + "</h3><span class='links'></span><button>Add</button></div>");
         obj.forEach(function (el, i) {
-            if (i < 5) {
-                $("[name='" + key + "'] .moreLinks").before("<a href='" + el.link + "' class=\"link\">" + el.name + "</a>");
-            }
-            else {
-                $("[name='" + key + "'] .moreLinks").append("<a href='" + el.link + "' class=\"link\">" + el.name + "</a>");
-            }
+            $("[name='" + key + "'] .links").prepend("<a href='" + el.link + "'>" + el.name + "</a>");
         });
     });
-    $(".moreLinks").slideUp();
-    $(".group").mouseenter(function () { $(".moreLinks", this).slideDown(); });
-    $(".group").mouseleave(function () { if (!$(this).hasClass("lock")) {
-        $(".moreLinks", this).slideUp();
-    } });
-    $(".group").click(function () { $(this).toggleClass("lock"); });
+    var groupHeight = $(window).height() - ($("footer").height() + $("header").height() + 50);
+    $(".group").height(groupHeight);
     $(window).resize(hideShow);
     $(".slider").click(function () {
-        if ($(this).children('div').first().is(':visible')) {
-            $(this).children('div').first().attr('id') == "start" ? leftSilde() : rightSlide();
-        }
+        $(this).attr('id') == "left-slider" ? leftSilde() : rightSlide();
     });
-    function rightSlide() {
-        if ($(".group:visible").length > 2) {
-            if (!$('*').is(':animated')) {
-                $('.group:visible:first').children().fadeOut("250", hideShow);
-            }
-        }
-    }
-    function leftSilde() {
-        if (!$('*').is(':animated')) {
-            $('.group:visible:first').prev().show();
-            $('.group:visible:first').children().fadeIn("250", hideShow);
-        }
-    }
-    function hideShow() {
-        var cellWidth = $(".area").width();
-        var groupsWidth = $("#GroupTable").width();
-        var nextGroupWidth = 1;
-        var run = true;
-        while (run && (groupsWidth > cellWidth)) {
-            if ($('.group:visible').length > 2)
-                $('.group:visible:last').hide();
-            else
-                run = false;
-            groupsWidth = $("#GroupTable").width();
-        }
-        run = true;
-        while (run && (nextGroupWidth > 0)) {
-            groupsWidth = $("#GroupTable").width();
-            if ($('.group:visible:last').next(':hidden').length !== 0)
-                nextGroupWidth = $('.group:visible:last').next(':hidden').width();
-            else
-                nextGroupWidth = 0;
-            if (cellWidth > (groupsWidth + nextGroupWidth))
-                $('.group:visible:last').next(':hidden').show();
-            else
-                run = false;
-        }
-        toggleSliders();
-    }
-    function toggleSliders() {
-        if ($('.group:first').is(':hidden')) {
-            $("#start").show();
-            $("#start").parent().addClass("slider_color");
-        }
-        else {
-            $("#start").hide();
-            $("#start").parent().removeClass("slider_color");
-        }
-        if ($('.group:last').is(':hidden')) {
-            $("#end").show();
-            $("#end").parent().addClass("slider_color");
-        }
-        else {
-            $("#end").hide();
-            $("#end").parent().removeClass("slider_color");
-        }
-    }
-    $("#search input[type=text]").first().focus();
+    hideShow();
+    $("input[type=text]").first().focus();
     $("#search").attr("action", $("#search input[type=submit]:first").attr("action"));
     $("#search input[type=submit]").click(function () {
         var x = $(this).attr("action");
